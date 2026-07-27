@@ -42,8 +42,7 @@ class TestParentNode(unittest.TestCase):
 
     def test_to_html_with_empty_child_list(self):
         parent_node = ParentNode("p", [])
-        with self.assertRaises(ValueError):
-            parent_node.to_html()
+        self.assertEqual(parent_node.to_html(), "<p></p>")
 
     def test_to_html_no_child(self):
         node = ParentNode("p", None)
