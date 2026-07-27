@@ -1,5 +1,7 @@
 from htmlnode import HTMLNode
 from textnode import TextNode, TextType
+from leafnode import LeafNode
+from parentnode import ParentNode
 
 
 def main():
@@ -14,6 +16,11 @@ def main():
         {"class": "my-class", "id": "my-id"},
     )
     print(htmlnode)
+
+    leafnode1 = LeafNode("b", "hii")
+    leafnode2 = LeafNode("i", "bob")
+    parentnode = ParentNode("p", [leafnode1, leafnode2])
+    print(parentnode.to_html())
 
 
 if __name__ == "__main__":
