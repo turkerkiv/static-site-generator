@@ -47,10 +47,10 @@ def text_node_to_html_node(text_node: TextNode) -> LeafNode:
             raise Exception("Unknown TextNode Type")
 
 
+# at first made without using split but being multiple charactered delimiter was not supported. So I made it with split.
 def split_nodes_delimiter(
     old_nodes: list[TextNode], delimiter: str, text_type: TextType
 ) -> list[TextNode]:
-    # did not wanna use split() as i wanted to implement it myself
     result_nodes = []
     for node in old_nodes:
         # we only split text nodes. no nested allowed
@@ -58,31 +58,16 @@ def split_nodes_delimiter(
             result_nodes.append(node)
             continue
 
-        # it converts one textnode with combined texttypes into multiple seperated textnodes
-        delimiter_count = node.text.count(delimiter)
-        delimiters = [delimiter for i in range(delimiter_count)]
-        if delimiter_count % 2 != 0:
-            raise Exception(
-                "Matching closing delimiter not found, invalid markdown syntax"
-            )
+        # even parts means there is odd number of delimiters which is invalid markdown syntax
+        parts = node.text.split(delimiter)
+        if len(parts) % 2 != 1:
+            raise Exception("Invalid markdown syntax")
 
-        text = ""
-        for c in node.text:
-            if c == delimiter:
-                delimiters.pop()
-                # it is end of text that is before the delimiter
-                if len(delimiters) % 2 != 0:
-                    result_nodes.append(TextNode(text, TextType.PLAIN_TEXT))
-                # it is end of text that is inside delimiter
-                else:
-                    result_nodes.append(TextNode(text, text_type))
-                text = ""
-                continue
-
-            text += c
-
-        # if there is text after the delimiter
-        if not text == "":
-            result_nodes.append(TextNode(text, TextType.PLAIN_TEXT))
+        for i in range(len(parts)):
+            # it handles the case where there are starting with delimiter and ending with delimiter and also the case where there are multiple delimiters in a row as there will be "" empty strings in the parts list
+            if i % 2 == 0 and parts[i] != "":
+                result_nodes.append(TextNode(parts[i], TextType.PLAIN_TEXT))
+            elif i % 2 == 1:
+                result_nodes.append(TextNode(parts[i], text_type))
 
     return result_nodes
