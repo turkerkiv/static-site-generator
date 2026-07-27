@@ -45,3 +45,44 @@ def text_node_to_html_node(text_node: TextNode) -> LeafNode:
             return LeafNode("img", "", {"src": text_node.url, "alt": text_node.text})
         case _:
             raise Exception("Unknown TextNode Type")
+
+
+def split_nodes_delimiter(
+    old_nodes: list[TextNode], delimiter: str, text_type: TextType
+) -> list[TextNode]:
+    # did not wanna use split() as i wanted to implement it myself
+    result_nodes = []
+    for node in old_nodes:
+        # we only split text nodes. no nested allowed
+        if node.text_type != TextType.PLAIN_TEXT:
+            result_nodes.append(node)
+            continue
+
+        # it converts one textnode with combined texttypes into multiple seperated textnodes
+        delimiter_count = node.text.count(delimiter)
+        delimiters = [delimiter for i in range(delimiter_count)]
+        if delimiter_count % 2 != 0:
+            raise Exception(
+                "Matching closing delimiter not found, invalid markdown syntax"
+            )
+
+        text = ""
+        for c in node.text:
+            if c == delimiter:
+                delimiters.pop()
+                # it is end of text that is before the delimiter
+                if len(delimiters) % 2 != 0:
+                    result_nodes.append(TextNode(text, TextType.PLAIN_TEXT))
+                # it is end of text that is inside delimiter
+                else:
+                    result_nodes.append(TextNode(text, text_type))
+                text = ""
+                continue
+
+            text += c
+
+        # if there is text after the delimiter
+        if not text == "":
+            result_nodes.append(TextNode(text, TextType.PLAIN_TEXT))
+
+    return result_nodes

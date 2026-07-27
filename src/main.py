@@ -1,5 +1,5 @@
 from htmlnode import HTMLNode
-from textnode import TextNode, TextType
+from textnode import TextNode, TextType, split_nodes_delimiter
 from leafnode import LeafNode
 from parentnode import ParentNode
 
@@ -21,6 +21,10 @@ def main():
     leafnode2 = LeafNode("i", "bob")
     parentnode = ParentNode("p", [leafnode1, leafnode2])
     print(parentnode.to_html())
+
+    node = TextNode("This is text with a `code block` word", TextType.PLAIN_TEXT)
+    new_nodes = split_nodes_delimiter([node], "`", TextType.CODE_TEXT)
+    print(new_nodes)
 
 
 if __name__ == "__main__":
