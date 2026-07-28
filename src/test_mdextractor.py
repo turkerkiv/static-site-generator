@@ -1,6 +1,10 @@
 import unittest
 
-from mdextractor import split_nodes_delimiter
+from mdextractor import (
+    split_nodes_delimiter,
+    extract_markdown_images,
+    extract_markdown_links,
+)
 from textnode import TextNode, TextType
 
 
@@ -84,6 +88,72 @@ class TestTextNode(unittest.TestCase):
         )
         with self.assertRaises(Exception):
             split_nodes_delimiter([node], "`", TextType.CODE_TEXT)
+
+    def test_extract_markdown_images(self):
+        matches = extract_markdown_images(
+            "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)"
+        )
+        self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
+
+    def test_extract_markdown_images_multiple(self):
+        matches = extract_markdown_images(
+            "![one](https://example.com/1.png) and ![two](https://example.com/2.png)"
+        )
+        self.assertListEqual(
+            [
+                ("one", "https://example.com/1.png"),
+                ("two", "https://example.com/2.png"),
+            ],
+            matches,
+        )
+
+    def test_extract_markdown_images_false_ones(self):
+        matches = extract_markdown_images(
+            "Not an image: [image](https://example.com/1.png) and ![broken](missing"
+        )
+        self.assertListEqual([], matches)
+
+    def test_extract_markdown_links(self):
+        matches = extract_markdown_links(
+            "This is text with a [link](https://i.imgur.com/zjjcJKZ.png)"
+        )
+        self.assertListEqual([("link", "https://i.imgur.com/zjjcJKZ.png")], matches)
+
+    def test_extract_markdown_links_multiple(self):
+        matches = extract_markdown_links(
+            "[one](https://example.com/1) and [two](https://example.com/2)"
+        )
+        print(matches)
+        self.assertListEqual(
+            [("one", "https://example.com/1"), ("two", "https://example.com/2")],
+            matches,
+        )
+
+    def test_extract_markdown_links_false_ones(self):
+        matches = extract_markdown_links(
+            "Not a link: (https://example.com) and [broken](missing"
+        )
+        self.assertListEqual([], matches)
+
+    def test_extract_markdown_tricky_mixed_text(self):
+        text = (
+            "Start ![img](https://example.com/img.png) mid [link](https://example.com) "
+            "end ![alt text](https://example.com/a-b_c.png) and [another](https://example.com?q=1)"
+        )
+        self.assertListEqual(
+            [
+                ("img", "https://example.com/img.png"),
+                ("alt text", "https://example.com/a-b_c.png"),
+            ],
+            extract_markdown_images(text),
+        )
+        self.assertListEqual(
+            [
+                ("link", "https://example.com"),
+                ("another", "https://example.com?q=1"),
+            ],
+            extract_markdown_links(text),
+        )
 
 
 if __name__ == "__main__":

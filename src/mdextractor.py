@@ -1,7 +1,8 @@
-# at first made without using split but being multiple charactered delimiter was not supported. So I made it with split.
 from textnode import TextNode, TextType
+import re
 
 
+# at first made without using split but being multiple charactered delimiter was not supported. So I made it with split.
 def split_nodes_delimiter(
     old_nodes: list[TextNode], delimiter: str, text_type: TextType
 ) -> list[TextNode]:
@@ -25,3 +26,15 @@ def split_nodes_delimiter(
                 result_nodes.append(TextNode(parts[i], text_type))
 
     return result_nodes
+
+
+def extract_markdown_images(text):
+    # matches = re.findall(r"!\[(.*?)\]\((https:\/\/.*?\..*?)\)", text)
+    matches = re.findall(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
+    return matches
+
+
+def extract_markdown_links(text):
+    # matches = re.findall(r"(?<!\!)\[(.*?)\]\((https:\/\/.*?\..*?)\)", text)
+    matches = re.findall(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
+    return matches
