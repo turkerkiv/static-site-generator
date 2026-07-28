@@ -127,7 +127,6 @@ class TestTextNode(unittest.TestCase):
         matches = extract_markdown_links(
             "[one](https://example.com/1) and [two](https://example.com/2)"
         )
-        print(matches)
         self.assertListEqual(
             [("one", "https://example.com/1"), ("two", "https://example.com/2")],
             matches,
