@@ -28,6 +28,74 @@ def split_nodes_delimiter(
     return result_nodes
 
 
+def split_nodes_image(old_nodes: list[TextNode]) -> list[TextNode]:
+    result_nodes = []
+    for node in old_nodes:
+        # we only split text nodes. no nested allowed
+        if node.text_type != TextType.PLAIN_TEXT:
+            result_nodes.append(node)
+            continue
+
+        matches_tuples = extract_markdown_images(node.text)
+        if len(matches_tuples) == 0:
+            result_nodes.append(TextNode(node.text, TextType.PLAIN_TEXT))
+            continue
+
+        text_parts = []
+        remaining_part = node.text
+        for i in range(len(matches_tuples)):
+            text_parts = remaining_part.split(
+                f"![{matches_tuples[i][0]}]({matches_tuples[i][1]})"
+            )
+
+            remaining_part = text_parts[1]
+            if text_parts[0] != "":
+                result_nodes.append(TextNode(text_parts[0], TextType.PLAIN_TEXT))
+
+            result_nodes.append(
+                TextNode(matches_tuples[i][0], TextType.IMAGE, matches_tuples[i][1])
+            )
+
+        if remaining_part != "":
+            result_nodes.append(TextNode(remaining_part, TextType.PLAIN_TEXT))
+
+    return result_nodes
+
+
+def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
+    result_nodes = []
+    for node in old_nodes:
+        # we only split text nodes. no nested allowed
+        if node.text_type != TextType.PLAIN_TEXT:
+            result_nodes.append(node)
+            continue
+
+        matches_tuples = extract_markdown_links(node.text)
+        if len(matches_tuples) == 0:
+            result_nodes.append(TextNode(node.text, TextType.PLAIN_TEXT))
+            continue
+
+        text_parts = []
+        remaining_part = node.text
+        for i in range(len(matches_tuples)):
+            text_parts = remaining_part.split(
+                f"[{matches_tuples[i][0]}]({matches_tuples[i][1]})"
+            )
+
+            remaining_part = text_parts[1]
+            if text_parts[0] != "":
+                result_nodes.append(TextNode(text_parts[0], TextType.PLAIN_TEXT))
+
+            result_nodes.append(
+                TextNode(matches_tuples[i][0], TextType.LINK, matches_tuples[i][1])
+            )
+
+        if remaining_part != "":
+            result_nodes.append(TextNode(remaining_part, TextType.PLAIN_TEXT))
+
+    return result_nodes
+
+
 def extract_markdown_images(text):
     # matches = re.findall(r"!\[(.*?)\]\((https:\/\/.*?\..*?)\)", text)
     matches = re.findall(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
