@@ -117,3 +117,14 @@ def text_to_textnodes(text):
     result_nodes = split_nodes_image(result_nodes)
     result_nodes = split_nodes_link(result_nodes)
     return result_nodes
+
+
+def markdown_to_blocks(markdown: str):
+    # takes whole markdown file and seperates it into blocks
+    # assuming markdown has newline between blocks as it is properly formatted markdown
+    blocks = markdown.split("\n\n")
+    checked_blocks = []
+    for block in blocks:
+        if block.strip() != "":
+            checked_blocks.append(block.strip())
+    return checked_blocks

@@ -1,6 +1,7 @@
 import unittest
 
 from mdextractor import (
+    markdown_to_blocks,
     split_nodes_delimiter,
     extract_markdown_images,
     extract_markdown_links,
@@ -416,6 +417,71 @@ class TestTextNode(unittest.TestCase):
     def test_text_to_textnodes_empty_string(self):
         result = text_to_textnodes("")
         self.assertListEqual([], result)
+
+    def test_markdown_to_blocks(self):
+        md = """
+This is **bolded** paragraph
+
+This is another paragraph with _italic_ text and `code` here
+This is the same paragraph on a new line
+
+- This is a list
+- with items
+"""
+
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(
+            blocks,
+            [
+                "This is **bolded** paragraph",
+                "This is another paragraph with _italic_ text and `code` here\nThis is the same paragraph on a new line",
+                "- This is a list\n- with items",
+            ],
+        )
+
+    def test_markdown_to_blocks_extra_blank_lines(self):
+        md = """
+
+First block
+
+
+
+Second block
+
+
+Third block
+
+"""
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(
+            blocks,
+            [
+                "First block",
+                "Second block",
+                "Third block",
+            ],
+        )
+
+    def test_markdown_to_blocks_trims_block_whitespace(self):
+        md = """
+   First block with spaces   
+
+    Second block line one    
+Second block line two   
+"""
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(
+            blocks,
+            [
+                "First block with spaces",
+                "Second block line one    \nSecond block line two",
+            ],
+        )
+
+    def test_markdown_to_blocks_whitespace_only(self):
+        md = "\n   \n\t\n\n"
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(blocks, [])
 
 
 if __name__ == "__main__":
