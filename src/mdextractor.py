@@ -106,3 +106,14 @@ def extract_markdown_links(text):
     # matches = re.findall(r"(?<!\!)\[(.*?)\]\((https:\/\/.*?\..*?)\)", text)
     matches = re.findall(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
     return matches
+
+
+def text_to_textnodes(text):
+    result_nodes = split_nodes_delimiter(
+        [TextNode(text, TextType.PLAIN_TEXT)], "**", TextType.BOLD_TEXT
+    )
+    result_nodes = split_nodes_delimiter(result_nodes, "_", TextType.ITALIC_TEXT)
+    result_nodes = split_nodes_delimiter(result_nodes, "`", TextType.CODE_TEXT)
+    result_nodes = split_nodes_image(result_nodes)
+    result_nodes = split_nodes_link(result_nodes)
+    return result_nodes
