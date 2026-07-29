@@ -4,6 +4,10 @@ This is a simple paragraph with **bold**, _italic_, `inline code`, and a [link](
 
 This paragraph also contains **nested *formatting*** (not supported).
 
+This is **bolded** paragraph
+text in a p
+tag here
+
 ## Lists
 
 - First unordered item

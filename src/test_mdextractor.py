@@ -2,6 +2,7 @@ import unittest
 
 from mdextractor import (
     markdown_to_blocks,
+    markdown_to_html_root_node,
     split_nodes_delimiter,
     extract_markdown_images,
     extract_markdown_links,
@@ -12,7 +13,7 @@ from mdextractor import (
 from textnode import TextNode, TextType
 
 
-class TestTextNode(unittest.TestCase):
+class TestMDExtractor(unittest.TestCase):
     def test_split_nodes_code_delimiter(self):
         node = TextNode("This is text with a `code block` word", TextType.PLAIN_TEXT)
         new_nodes = split_nodes_delimiter([node], "`", TextType.CODE_TEXT)
@@ -481,6 +482,125 @@ Second block line two
         md = "\n   \n\t\n\n"
         blocks = markdown_to_blocks(md)
         self.assertEqual(blocks, [])
+
+    def test_paragraphs(self):
+        md = """
+This is **bolded** paragraph
+text in a p
+tag here
+
+This is another paragraph with _italic_ text and `code` here
+"""
+
+        root_node = markdown_to_html_root_node(md)
+        html = root_node.to_html()
+        self.assertEqual(
+            html,
+            "<html><head></head><body><p>This is <b>bolded</b> paragraph text in a p tag here</p><p>This is another paragraph with <i>italic</i> text and <code>code</code> here</p></body></html>",
+        )
+
+    def test_codeblock(self):
+        md = """
+```
+This is text that _should_ remain
+the **same** even with inline stuff
+```
+"""
+
+        root_node = markdown_to_html_root_node(md)
+        html = root_node.to_html()
+        self.assertEqual(
+            html,
+            "<html><head></head><body><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></body></html>",
+        )
+
+    def test_codeblock_with_backticks(self):
+        md = """
+```
+This has `backticks` inside
+and **bold** should _not_ parse
+```
+"""
+
+        root_node = markdown_to_html_root_node(md)
+        html = root_node.to_html()
+        self.assertEqual(
+            html,
+            "<html><head></head><body><pre><code>This has `backticks` inside\nand **bold** should _not_ parse\n</code></pre></body></html>",
+        )
+
+    def test_unclosed_formatting(self):
+        md = "This is **unclosed bold text"
+
+        with self.assertRaises(Exception):
+            root_node = markdown_to_html_root_node(md)
+            html = root_node.to_html()
+
+    def test_consecutive_formatting(self):
+        md = "This is **bold**_italic_`code` text"
+
+        root_node = markdown_to_html_root_node(md)
+        html = root_node.to_html()
+        self.assertIn("<b>bold</b>", html)
+        self.assertIn("<i>italic</i>", html)
+        self.assertIn("<code>code</code>", html)
+
+    def test_empty_formatting(self):
+        md = "This has ** ** and __ __ empty markers"
+
+        with self.assertRaises(ValueError):
+            root_node = markdown_to_html_root_node(md)
+            html = root_node.to_html()
+
+    def test_mixed_delimiters_in_code(self):
+        md = """
+```
+const str = "**bold** and _italic_";
+function test() { return `template ${var}`; }
+```
+"""
+
+        root_node = markdown_to_html_root_node(md)
+        html = root_node.to_html()
+        self.assertIn("const str", html)
+        self.assertNotIn("<b>", html)
+        self.assertNotIn("<i>", html)
+
+    def test_paragraph_with_multiple_code_blocks(self):
+        md = "Use `code1` and `code2` in paragraph"
+
+        root_node = markdown_to_html_root_node(md)
+        html = root_node.to_html()
+        self.assertIn("<code>code1</code>", html)
+        self.assertIn("<code>code2</code>", html)
+
+    def test_formatting_at_boundaries(self):
+        md = "**start** text _end_"
+
+        root_node = markdown_to_html_root_node(md)
+        html = root_node.to_html()
+        self.assertIn("<b>start</b>", html)
+        self.assertIn("<i>end</i>", html)
+
+    def test_whitespace_around_formatting(self):
+        md = "text ** bold ** more"
+
+        root_node = markdown_to_html_root_node(md)
+        html = root_node.to_html()
+        self.assertTrue(len(html) > 0)
+
+    def test_special_characters_in_code(self):
+        md = """
+```
+@#$%^&*()[]{}\\/<>?
+|`~!@#$%^&*()
+```
+"""
+
+        root_node = markdown_to_html_root_node(md)
+        html = root_node.to_html()
+        self.assertIn("@#$%^&*()", html)
+        self.assertNotIn("<b>", html)
 
 
 if __name__ == "__main__":

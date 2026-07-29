@@ -7,7 +7,7 @@ class TestBlockNode(unittest.TestCase):
     def test_block_to_block_type(self):
         block = "#### this is heading 4"
         block_type = block_to_block_type(block)
-        self.assertEqual(block_type, BlockType.HEADING)
+        self.assertEqual(block_type, BlockType.HEADING4)
 
     def test_block_to_block_type_paragraph(self):
         block = "this is just a paragraph"
