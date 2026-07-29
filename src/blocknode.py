@@ -80,6 +80,8 @@ def block_to_node_directly(block: str, block_type: BlockType) -> ParentNode:
 
     match (block_type):
         case BlockType.PARAGRAPH:
+            lines = block.split("\n")
+            block = " ".join([line.strip() for line in lines])
             text_nodes = text_to_textnodes(block)
             leaf_nodes = [text_node_to_leaf_node(text_node) for text_node in text_nodes]
             return ParentNode("p", leaf_nodes)
