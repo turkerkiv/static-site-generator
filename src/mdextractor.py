@@ -1,3 +1,5 @@
+from blocknode import BlockType, block_to_block_type, block_to_node_directly
+from parentnode import ParentNode
 from textnode import TextNode, TextType
 import re
 
@@ -96,19 +98,19 @@ def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
     return result_nodes
 
 
-def extract_markdown_images(text):
-    # matches = re.findall(r"!\[(.*?)\]\((https:\/\/.*?\..*?)\)", text)
+def extract_markdown_images(text: str) -> list[str]:
+    # matches = re.findall(r"!\[(.*?)\]\((https:\/\/.*?\..*?)\)", text) - it was mine
     matches = re.findall(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
     return matches
 
 
-def extract_markdown_links(text):
-    # matches = re.findall(r"(?<!\!)\[(.*?)\]\((https:\/\/.*?\..*?)\)", text)
+def extract_markdown_links(text: str) -> list[str]:
+    # matches = re.findall(r"(?<!\!)\[(.*?)\]\((https:\/\/.*?\..*?)\)", text) - it was mine
     matches = re.findall(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
     return matches
 
 
-def text_to_textnodes(text):
+def text_to_textnodes(text: str) -> list[TextNode]:
     result_nodes = split_nodes_delimiter(
         [TextNode(text, TextType.PLAIN_TEXT)], "**", TextType.BOLD_TEXT
     )
@@ -119,7 +121,7 @@ def text_to_textnodes(text):
     return result_nodes
 
 
-def markdown_to_blocks(markdown: str):
+def markdown_to_blocks(markdown: str) -> list[str]:
     # takes whole markdown file and seperates it into blocks
     # assuming markdown has newline between blocks as it is properly formatted markdown
     blocks = markdown.split("\n\n")
@@ -128,3 +130,17 @@ def markdown_to_blocks(markdown: str):
         if block.strip() != "":
             checked_blocks.append(block.strip())
     return checked_blocks
+
+
+def markdown_to_html_root_node(markdown: str) -> ParentNode:
+    # converts whole markdown file to html node tree
+    blocks = markdown_to_blocks(markdown)
+    html_head = ParentNode("head", [])
+    html_body = ParentNode("body", [])
+    html_root = ParentNode("html", [html_head, html_body])
+    for block in blocks:
+        block_type = block_to_block_type(block)
+        node = block_to_node_directly(block, block_type)
+        html_body.children.append(node)
+
+    return html_root
