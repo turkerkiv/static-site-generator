@@ -149,4 +149,4 @@ def extract_title(markdown: str) -> str:
     for block in blocks:
         if block.startswith("# "):
             return block.removeprefix("# ")
-    raise Exception("No h1 in markdown")
+    return "Untitled"  # if no h1 is found, return "Untitled"

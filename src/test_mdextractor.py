@@ -623,8 +623,8 @@ this is just a paragraph
 
 ### this is title 3
     """
-        with self.assertRaises(Exception):
-            title = extract_title(md)
+        title = extract_title(md)
+        self.assertEqual(title, "Untitled")
 
 
 if __name__ == "__main__":
