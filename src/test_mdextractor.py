@@ -497,7 +497,7 @@ This is another paragraph with _italic_ text and `code` here
         html = root_node.to_html()
         self.assertEqual(
             html,
-            "<html><head></head><body><p>This is <b>bolded</b> paragraph text in a p tag here</p><p>This is another paragraph with <i>italic</i> text and <code>code</code> here</p></body></html>",
+            "<div><p>This is <b>bolded</b> paragraph text in a p tag here</p><p>This is another paragraph with <i>italic</i> text and <code>code</code> here</p></div>",
         )
 
     def test_codeblock(self):
@@ -512,7 +512,7 @@ the **same** even with inline stuff
         html = root_node.to_html()
         self.assertEqual(
             html,
-            "<html><head></head><body><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></body></html>",
+            "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
         )
 
     def test_codeblock_with_backticks(self):
@@ -527,7 +527,7 @@ and **bold** should _not_ parse
         html = root_node.to_html()
         self.assertEqual(
             html,
-            "<html><head></head><body><pre><code>This has `backticks` inside\nand **bold** should _not_ parse\n</code></pre></body></html>",
+            "<div><pre><code>This has `backticks` inside\nand **bold** should _not_ parse\n</code></pre></div>",
         )
 
     def test_unclosed_formatting(self):
