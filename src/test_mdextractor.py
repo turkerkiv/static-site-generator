@@ -1,8 +1,9 @@
 import unittest
 
 from mdextractor import (
+    extract_title,
     markdown_to_blocks,
-    markdown_to_html_root_node,
+    whole_markdown_to_html_node,
     split_nodes_delimiter,
     extract_markdown_images,
     extract_markdown_links,
@@ -492,7 +493,7 @@ tag here
 This is another paragraph with _italic_ text and `code` here
 """
 
-        root_node = markdown_to_html_root_node(md)
+        root_node = whole_markdown_to_html_node(md)
         html = root_node.to_html()
         self.assertEqual(
             html,
@@ -507,7 +508,7 @@ the **same** even with inline stuff
 ```
 """
 
-        root_node = markdown_to_html_root_node(md)
+        root_node = whole_markdown_to_html_node(md)
         html = root_node.to_html()
         self.assertEqual(
             html,
@@ -522,7 +523,7 @@ and **bold** should _not_ parse
 ```
 """
 
-        root_node = markdown_to_html_root_node(md)
+        root_node = whole_markdown_to_html_node(md)
         html = root_node.to_html()
         self.assertEqual(
             html,
@@ -533,13 +534,13 @@ and **bold** should _not_ parse
         md = "This is **unclosed bold text"
 
         with self.assertRaises(Exception):
-            root_node = markdown_to_html_root_node(md)
+            root_node = whole_markdown_to_html_node(md)
             html = root_node.to_html()
 
     def test_consecutive_formatting(self):
         md = "This is **bold**_italic_`code` text"
 
-        root_node = markdown_to_html_root_node(md)
+        root_node = whole_markdown_to_html_node(md)
         html = root_node.to_html()
         self.assertIn("<b>bold</b>", html)
         self.assertIn("<i>italic</i>", html)
@@ -549,7 +550,7 @@ and **bold** should _not_ parse
         md = "This has ** ** and __ __ empty markers"
 
         with self.assertRaises(ValueError):
-            root_node = markdown_to_html_root_node(md)
+            root_node = whole_markdown_to_html_node(md)
             html = root_node.to_html()
 
     def test_mixed_delimiters_in_code(self):
@@ -560,7 +561,7 @@ function test() { return `template ${var}`; }
 ```
 """
 
-        root_node = markdown_to_html_root_node(md)
+        root_node = whole_markdown_to_html_node(md)
         html = root_node.to_html()
         self.assertIn("const str", html)
         self.assertNotIn("<b>", html)
@@ -569,7 +570,7 @@ function test() { return `template ${var}`; }
     def test_paragraph_with_multiple_code_blocks(self):
         md = "Use `code1` and `code2` in paragraph"
 
-        root_node = markdown_to_html_root_node(md)
+        root_node = whole_markdown_to_html_node(md)
         html = root_node.to_html()
         self.assertIn("<code>code1</code>", html)
         self.assertIn("<code>code2</code>", html)
@@ -577,7 +578,7 @@ function test() { return `template ${var}`; }
     def test_formatting_at_boundaries(self):
         md = "**start** text _end_"
 
-        root_node = markdown_to_html_root_node(md)
+        root_node = whole_markdown_to_html_node(md)
         html = root_node.to_html()
         self.assertIn("<b>start</b>", html)
         self.assertIn("<i>end</i>", html)
@@ -585,7 +586,7 @@ function test() { return `template ${var}`; }
     def test_whitespace_around_formatting(self):
         md = "text ** bold ** more"
 
-        root_node = markdown_to_html_root_node(md)
+        root_node = whole_markdown_to_html_node(md)
         html = root_node.to_html()
         self.assertTrue(len(html) > 0)
 
@@ -597,10 +598,33 @@ function test() { return `template ${var}`; }
 ```
 """
 
-        root_node = markdown_to_html_root_node(md)
+        root_node = whole_markdown_to_html_node(md)
         html = root_node.to_html()
         self.assertIn("@#$%^&*()", html)
         self.assertNotIn("<b>", html)
+
+    def test_extract_title(self):
+        md = """
+# this is title 1
+
+this is just a paragraph 
+
+## this is title 2
+"""
+
+        title = extract_title(md)
+        self.assertEqual(title, "this is title 1")
+
+    def test_extract_title_none(self):
+        md = """
+## this is title 2
+
+this is just a paragraph 
+
+### this is title 3
+    """
+        with self.assertRaises(Exception):
+            title = extract_title(md)
 
 
 if __name__ == "__main__":

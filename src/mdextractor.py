@@ -142,3 +142,11 @@ def whole_markdown_to_html_node(markdown: str) -> ParentNode:
         parent_html_node.children.append(node)
 
     return parent_html_node
+
+
+def extract_title(markdown: str) -> str:
+    blocks = markdown_to_blocks(markdown)
+    for block in blocks:
+        if block.startswith("# "):
+            return block.removeprefix("# ")
+    raise Exception("No h1 in markdown")
