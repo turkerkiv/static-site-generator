@@ -132,15 +132,13 @@ def markdown_to_blocks(markdown: str) -> list[str]:
     return checked_blocks
 
 
-def markdown_to_html_root_node(markdown: str) -> ParentNode:
+def whole_markdown_to_html_node(markdown: str) -> ParentNode:
     # converts whole markdown file to html node tree
     blocks = markdown_to_blocks(markdown)
-    html_head = ParentNode("head", [])
-    html_body = ParentNode("body", [])
-    html_root = ParentNode("html", [html_head, html_body])
+    parent_html_node = ParentNode("div", [])
     for block in blocks:
         block_type = block_to_block_type(block)
         node = block_to_node_directly(block, block_type)
-        html_body.children.append(node)
+        parent_html_node.children.append(node)
 
-    return html_root
+    return parent_html_node
