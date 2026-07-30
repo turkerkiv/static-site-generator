@@ -125,21 +125,26 @@ def block_to_node_directly(block: str, block_type: BlockType) -> ParentNode:
 
         case BlockType.QUOTE:
             lines = block.split("\n")
-            lines_text_nodes: list[list[TextNode]] = [
-                text_to_textnodes(line.removeprefix(">")) for line in lines
-            ]
+            # lines_text_nodes: list[list[TextNode]] = [
+            #     text_to_textnodes(line.removeprefix(">")) for line in lines
+            # ]
 
-            lines_leaf_nodes: list[list[LeafNode]] = []
-            for line_text_nodes in lines_text_nodes:
-                lines_leaf_nodes.append(
-                    [text_node_to_leaf_node(text_node) for text_node in line_text_nodes]
-                )
+            # lines_leaf_nodes: list[list[LeafNode]] = []
+            # for line_text_nodes in lines_text_nodes:
+            #     lines_leaf_nodes.append(
+            #         [text_node_to_leaf_node(text_node) for text_node in line_text_nodes]
+            #     )
 
-            parent_p_nodes: list[ParentNode] = [
-                ParentNode("p", line_leaf_nodes) for line_leaf_nodes in lines_leaf_nodes
-            ]
+            # parent_p_nodes: list[ParentNode] = [
+            #     ParentNode("p", line_leaf_nodes) for line_leaf_nodes in lines_leaf_nodes
+            # ]
 
-            return ParentNode("blockquote", parent_p_nodes)
+            lines_without_prefix = [line.removeprefix(">") for line in lines]
+            block = " ".join([line.strip() for line in lines_without_prefix])
+            text_nodes = text_to_textnodes(block)
+            leaf_nodes = [text_node_to_leaf_node(text_node) for text_node in text_nodes]
+
+            return ParentNode("blockquote", leaf_nodes)
 
         case BlockType.UNORDERED_LIST:
             lines = block.split("\n")
