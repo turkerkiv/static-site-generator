@@ -338,7 +338,7 @@ class TestMDExtractor(unittest.TestCase):
 
     def test_text_to_textnodes(self):
         result = text_to_textnodes(
-            "This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+            "This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://google.com)"
         )
         self.assertListEqual(
             [
@@ -355,7 +355,7 @@ class TestMDExtractor(unittest.TestCase):
                     "https://i.imgur.com/fJRm4Vk.jpeg",
                 ),
                 TextNode(" and a ", TextType.PLAIN_TEXT),
-                TextNode("link", TextType.LINK, "https://boot.dev"),
+                TextNode("link", TextType.LINK, "https://google.com"),
             ],
             result,
         )
